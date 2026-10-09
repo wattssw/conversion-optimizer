@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Conversion Optimizer</title>
+  <meta name="description" content="Paste any URL to audit a page for conversion opportunities and get prioritized recommendations." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,640&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f4efe6;
+      --bg-2: #ece4d6;
+      --ink: #1b1814;
+      --muted: #6d665c;
+      --paper: #fffdf8;
+      --line: #e2d8c8;
+      --accent: #c94b28;
+      --accent-dark: #9e3418;
+      --forest: #1e6b4a;
+      --forest-soft: #e5f3eb;
+      --gold: #b8862a;
+      --navy: #243044;
+      --high: #b42318;
+      --high-bg: #fdecea;
+      --med: #b54708;
+      --med-bg: #fef4e6;
+      --low: #175cd3;
+      --low-bg: #eef4ff;
+      --shadow: 0 24px 60px rgba(27, 24, 20, 0.08);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      font-family: "DM Sans", system-ui, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 500px at 10% -10%, #f8e3d4 0%, transparent 55%),
+        radial-gradient(900px 420px at 100% 0%, #dce8df 0%, transparent 50%),
+        var(--bg);
+      line-height: 1.5;
+    }
+
+    body::before {
+      content: "";
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      opacity: 0.35;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
+      mix-blend-mode: multiply;
+    }
+
+    .wrap {
+      position: relative;
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 80px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 36px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 650;
+      letter-spacing: -0.02em;
+    }
+
+    .mark {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--ink);
+      color: var(--paper);
+      display: grid;
+      place-items: center;
+      font-family: Fraunces, serif;
+      font-weight: 640;
+    }
+
+    .chip {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      border: 1px solid var(--line);
+      background: rgba(255, 253, 248, 0.7);
+      padding: 6px 10px;
+      border-radius: 999px;
+    }
+
+    .hero h1 {
+      font-family: Fraunces, serif;
+      font-size: clamp(36px, 6vw, 64px);
+      font-weight: 640;
+      letter-spacing: -0.035em;
+      line-height: 1.05;
+      margin: 0 0 12px;
+      max-width: 14ch;
+    }
+
+    .hero p.lede {
+      max-width: 52ch;
+      color: var(--muted);
+      font-size: 18px;
+      margin: 0 0 28px;
+    }
+
+    form.audit {
+      display: flex;
+      gap: 10px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 8px;
+      box-shadow: var(--shadow);
+      max-width: 760px;
+    }
+
+    form.audit input {
+      flex: 1;
+      border: 0;
+      outline: 0;
+      font: inherit;
+      font-size: 16px;
+      padding: 12px 14px;
+      background: transparent;
+      color: var(--ink);
+      min-width: 0;
+    }
+    form.audit input::placeholder { color: #9a9286; }
+
+    form.audit button,
+    .ghost {
+      appearance: none;
+      border: 0;
+      cursor: pointer;
+      font: inherit;
+    }
+
+    form.audit button[type="submit"] {
+      background: var(--accent);
+      color: white;
+      font-weight: 700;
+      padding: 12px 18px;
+      border-radius: 12px;
+      white-space: nowrap;
+    }
+
+    form.audit button[type="submit"]:hover { background: var(--accent-dark); }
+    form.audit button[type="submit"]:disabled {
+      opacity: 0.65;
+      cursor: wait;
+    }
+
+    .examples {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+      align-items: center;
+    }
+
+    .examples span { color: var(--muted); font-size: 13px; }
+    .examples button {
+      border: 1px solid var(--line);
+      background: rgba(255,253,248,.7);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font: inherit;
+      font-size: 13px;
+      cursor: pointer;
+      color: var(--ink);
+    }
+    .examples button:hover { border-color: var(--ink); }
+
+    .status {
+      margin-top: 22px;
+      display: none;
+      max-width: 760px;
+    }
+    .status.visible { display: block; }
+    .status.error {
+      background: var(--high-bg);
+      color: var(--high);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-weight: 600;
+    }
+    .steps {
+      display: grid;
+      gap: 8px;
+    }
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--line);
+      flex: 0 0 auto;
+    }
+    .step.active { color: var(--ink); font-weight: 600; }
+    .step.active .dot { background: var(--accent); box-shadow: 0 0 0 6px rgba(201,75,40,.15); }
+    .step.done { color: var(--forest); }
+    .step.done .dot { background: var(--forest); }
+
+    .results { display: none; margin-top: 42px; }
+    .results.visible { display: block; }
+
+    .summary {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+
+    .card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .shot {
+      aspect-ratio: 16 / 10;
+      background: #d9d1c3;
+      overflow: hidden;
+      position: relative;
+    }
+    .shot img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center;
+      display: block;
+    }
+    .page-meta { padding: 18px 20px 20px; }
+    .page-meta h2 {
+      font-family: Fraunces, serif;
+      font-size: 22px;
+      margin: 0 0 6px;
+      letter-spacing: -0.03em;
+    }
+    .page-meta p { margin: 0; color: var(--muted); font-size: 14px; }
+    .page-meta a { color: var(--accent-dark); word-break: break-all; }
+    .found {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .found b {
+      font-weight: 600;
+      font-size: 12px;
+      background: var(--bg-2);
+      border-radius: 999px;
+      padding: 5px 9px;
+    }
+
+    .score-card { padding: 22px; }
+    .score-top {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+    .ring { width: 108px; height: 108px; flex: 0 0 auto; }
+    .score-num {
+      font-family: Fraunces, serif;
+      font-size: 40px;
+      letter-spacing: -0.04em;
+    }
+    .score-label { color: var(--muted); font-size: 14px; }
+    .limited {
+      margin-top: 12px;
+      font-size: 13px;
+      color: var(--med);
+      background: var(--med-bg);
+      padding: 8px 10px;
+      border-radius: 10px;
+    }
+    .cats { display: grid; gap: 10px; margin-top: 18px; }
+    .cat { display: grid; grid-template-columns: 110px 1fr 36px; gap: 8px; align-items: center; font-size: 13px; }
+    .bar { height: 8px; background: var(--bg-2); border-radius: 99px; overflow: hidden; }
+    .bar > i { display: block; height: 100%; background: var(--ink); border-radius: inherit; }
+    .cat strong { font-variant-numeric: tabular-nums; text-align: right; }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 12px;
+      margin: 8px 0 14px;
+    }
+    .toolbar h3 {
+      font-family: Fraunces, serif;
+      font-size: 28px;
+      margin: 0;
+      letter-spacing: -0.03em;
+    }
+    .ghost {
+      border: 1px solid var(--line);
+      background: var(--paper);
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .rec-list { display: grid; gap: 12px; }
+    .rec {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px 18px;
+    }
+    .rec-head {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .pri {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      border-radius: 999px;
+      padding: 4px 8px;
+    }
+    .pri.high { background: var(--high-bg); color: var(--high); }
+    .pri.medium { background: var(--med-bg); color: var(--med); }
+    .pri.low { background: var(--low-bg); color: var(--low); }
+    .tag {
+      font-size: 11px;
+      color: var(--muted);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 3px 8px;
+    }
+    .rec h4 { margin: 0; font-size: 17px; letter-spacing: -0.02em; }
+    .rec p { margin: 8px 0 0; color: var(--muted); }
+    .rec .how {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed var(--line);
+      color: var(--ink);
+      font-size: 14px;
+    }
+    .evidence {
+      margin-top: 8px;
+      font-size: 13px;
+      font-style: italic;
+      color: var(--muted);
+    }
+
+    .strengths { margin-top: 28px; }
+    .strengths ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 8px;
+    }
+    .strengths li {
+      background: var(--forest-soft);
+      color: var(--forest);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-weight: 550;
+    }
+
+    footer.note {
+      margin-top: 40px;
+      color: var(--muted);
+      font-size: 13px;
+      max-width: 70ch;
+    }
+
+    @media (max-width: 800px) {
+      .summary { grid-template-columns: 1fr; }
+      form.audit { flex-direction: column; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { transition: none !important; animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand"><span class="mark">C</span> Conversion Optimizer</div>
+      <div class="chip">Public HTML snapshot · No login required</div>
+    </header>
+
+    <section class="hero">
+      <h1>Find the leaks in any landing page.</h1>
+      <p class="lede">Enter a URL. The app fetches a public snapshot of the page and scores it against conversion heuristics: value proposition, calls to action, trust, friction, content, and technical basics.</p>
+      <form class="audit" id="form">
+        <label class="visually-hidden" for="url" style="position:absolute;left:-9999px">Page URL</label>
+        <input id="url" name="url" type="text" inputmode="url" autocomplete="url" placeholder="https://example.com/pricing" required />
+        <button type="submit" id="go">Analyze page</button>
+      </form>
+      <div class="examples">
+        <span>Try</span>
+        <button type="button" data-url="https://stripe.com">stripe.com</button>
+        <button type="button" data-url="https://www.apple.com">apple.com</button>
+        <button type="button" data-url="https://www.notion.so">notion.so</button>
+        <button type="button" data-url="https://www.shopify.com">shopify.com</button>
+      </div>
+      <div class="status" id="status" role="status" aria-live="polite"></div>
+    </section>
+
+    <section class="results" id="results"></section>
+    <footer class="note">
+      Recommendations are heuristic, not a substitute for analytics or user testing. JavaScript-rendered content, personalization, and behind-login pages may be incomplete. Pages are requested through public CORS proxies; nothing you enter is stored on a server we control.
+    </footer>
+  </div>
+
+  <script>
+    const form = document.getElementById("form");
+    const urlInput = document.getElementById("url");
+    const goBtn = document.getElementById("go");
+    const statusEl = document.getElementById("status");
+    const resultsEl = document.getElementById("results");
+
+    document.querySelectorAll(".examples button").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        urlInput.value = btn.dataset.url;
+        urlInput.focus();
+      });
+    });
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const url = normalizeUrl(urlInput.value.trim());
+      if (!url) {
+        showError("Enter a valid http or https URL.");
+        return;
+      }
+      urlInput.value = url;
+      await runAudit(url);
+    });
+
+    const initialUrl = normalizeUrl(new URLSearchParams(location.search).get("url") || "");
+    if (initialUrl) {
+      urlInput.value = initialUrl;
+      runAudit(initialUrl);
+    }
+
+    function normalizeUrl(value) {
+      if (!value) return "";
+      let next = value;
+      if (!/^https?:\/\//i.test(next)) next = "https://" + next;
+      try {
+        const parsed = new URL(next);
+        if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return "";
+        return parsed.toString();
+      } catch {
+        return "";
+      }
+    }
+
+    function showError(message) {
+      statusEl.className = "status visible error";
+      statusEl.textContent = message;
+    }
+
+    function showSteps(active) {
+      const labels = ["Fetch public HTML", "Parse structure and copy", "Score conversion heuristics", "Prioritize recommendations"];
+      statusEl.className = "status visible";
+      statusEl.innerHTML = `<div class="steps">${labels.map((label, index) => {
+        const state = index < active ? "done" : index === active ? "active" : "";
+        return `<div class="step ${state}"><span class="dot"></span>${label}</div>`;
+      }).join("")}</div>`;
+    }
+
+    async function runAudit(url) {
+      goBtn.disabled = true;
+      resultsEl.className = "results";
+      resultsEl.innerHTML = "";
+      showSteps(0);
+      try {
+        const snapshot = await fetchSnapshot(url);
+        showSteps(1);
+        await wait(180);
+        showSteps(2);
+        const report = analyzePage(url, snapshot);
+        showSteps(3);
+        await wait(160);
+        renderReport(url, snapshot, report);
+        statusEl.className = "status";
+        statusEl.innerHTML = "";
+      } catch (error) {
+        showError(error.message || "Could not analyze that URL.");
+      } finally {
+        goBtn.disabled = false;
+      }
+    }
+
+    function wait(ms) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
+    async function fetchSnapshot(url) {
+      const settled = await Promise.allSettled([
+        fetchAsHtml(`https://corsproxy.io/?url=${encodeURIComponent(url)}`, 7000),
+        fetchAsHtml(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`, 7000),
+        fetchJina(url),
+        fetchMicrolink(url)
+      ]);
+      const snapshots = settled
+        .filter((result) => result.status === "fulfilled")
+        .map((result) => result.value)
+        .filter((snapshot) => snapshot && snapshot.body && looksLikeTargetPage(snapshot.body, url));
+      const microlink = snapshots.find((snapshot) => snapshot.source === "microlink");
+      const primary = snapshots.find((snapshot) => snapshot.kind === "html")
+        || snapshots.find((snapshot) => snapshot.source === "jina")
+        || snapshots[0]
+        || { kind: "none", body: "" };
+      if (primary && microlink && microlink.meta) primary.meta = microlink.meta;
+      return primary;
+    }
+
+    function looksLikeTargetPage(body, url) {
+      if (/just a moment|attention required|access denied|enable javascript to challenge/i.test(body.slice(0, 1500))) {
+        return false;
+      }
+      const host = new URL(url).hostname.replace(/^www\./, "").toLowerCase();
+      return body.slice(0, 25000).toLowerCase().includes(host);
+    }
+
+    async function fetchAsHtml(resource, ms) {
+      const response = await fetchWithTimeout(resource, ms);
+      const html = await response.text();
+      if (!response.ok || html.length < 80) throw new Error("empty");
+      return { kind: "html", body: html, source: "proxy" };
+    }
+
+    async function fetchJina(url) {
+      const response = await fetchWithTimeout(`https://r.jina.ai/${url}`, 12000, {
+        headers: { "X-No-Cache": "true", Accept: "text/plain" }
+      });
+      const text = await response.text();
+      if (!response.ok || text.length < 80) throw new Error("empty");
+      return { kind: "text", body: text, source: "jina" };
+    }
+
+    async function fetchMicrolink(url) {
+      const response = await fetchWithTimeout(`https://api.microlink.io/?url=${encodeURIComponent(url)}`, 10000);
+      const payload = await response.json();
+      const data = payload && payload.data;
+      if (payload.status !== "success" || !data) throw new Error("empty");
+      const title = data.title || "";
+      const description = data.description || "";
+      const body = `Title: ${title}\n\nURL Source: ${data.url || url}\n\n# ${title}\n\n${description}\n`;
+      return { kind: "text", body, source: "microlink", meta: { title, description } };
+    }
+
+    async function fetchWithTimeout(resource, ms, options = {}) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), ms);
+      try {
+        return await fetch(resource, { ...options, signal: controller.signal });
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+
+    const WEAK_CTA = /^(submit|click here|learn more|read more|here|ok|go|continue|next)$/i;
+    const STRONG_CTA = /\b(get started|start (for )?free|try (it )?free|buy now|shop now|add to cart|book (a )?demo|start (your )?trial|sign up|subscribe|download|get access|request demo|start selling|claim|join now|see pricing)\b/i;
+    const TRUST_WORDS = /\b(testimonial|reviews?|rated|trustpilot|guarantee|refund|secure|ssl|certified|trusted by|as seen in|customers?|clients?|case study|stars?|bbb|gdpr)\b/i;
+    const URGENCY_WORDS = /\b(limited time|today only|hurry|ends soon|only \d+ left|last chance|act now)\b/i;
+    const BENEFIT_WORDS = /\b(save|faster|free|grow|increase|reduce|automate|simple|easy|trusted|secure|no credit card)\b/i;
+
+    function analyzePage(url, snapshot) {
+      const parsedUrl = new URL(url);
+      const html = snapshot.kind === "html" ? snapshot.body : wrapTextAsHtml(snapshot.body);
+      const doc = new DOMParser().parseFromString(html, "text/html");
+      const limited = snapshot.kind !== "html";
+      const unreachable = snapshot.kind === "none";
+      const jsonLd = [...doc.querySelectorAll('script[type="application/ld+json"]')].length;
+
+      strip(doc, "script, style, noscript");
+      const titleFromText = snapshot.kind === "text" ? (snapshot.body.match(/^Title:\s*(.+)$/m) || [])[1] : "";
+      const title = text(doc.querySelector("title")) || titleFromText || (snapshot.meta && snapshot.meta.title) || parsedUrl.hostname;
+      const description = attr(doc.querySelector('meta[name="description"]'), "content")
+        || (snapshot.meta && snapshot.meta.description)
+        || "";
+      const h1s = [...doc.querySelectorAll("h1")].map(text).filter(Boolean);
+      const viewport = Boolean(doc.querySelector('meta[name="viewport"]'));
+      const canonical = attr(doc.querySelector('link[rel="canonical"]'), "href");
+      const ogTitle = attr(doc.querySelector('meta[property="og:title"]'), "content");
+      const images = [...doc.querySelectorAll("img")];
+      const missingAlt = images.filter((img) => !attr(img, "alt")).length;
+      const forms = [...doc.querySelectorAll("form")];
+      const fields = forms.flatMap((formEl) => [...formEl.querySelectorAll("input, select, textarea")])
+        .filter((el) => !["hidden", "submit", "button", "reset", "image"].includes((el.getAttribute("type") || "").toLowerCase()));
+      const navLinks = doc.querySelectorAll("nav a, header a");
+      const scripts = (snapshot.body.match(/<script/gi) || []).length;
+      const wordText = visibleText(doc);
+      const words = wordText ? wordText.split(/\s+/).filter(Boolean) : [];
+      const ctas = mergeCtas(collectCtas(doc), collectMarkdownCtas(snapshot.body));
+      const strongCtas = ctas.filter((cta) => STRONG_CTA.test(cta));
+      const weakCtas = ctas.filter((cta) => WEAK_CTA.test(cta));
+      const hasHttps = parsedUrl.protocol === "https:";
+      const hasFaq = /faq|frequently asked/i.test(wordText) || Boolean(doc.querySelector("[id*='faq' i], [class*='faq' i]"));
+      const hasPricing = /pricing|price|\$\d/.test(wordText);
+      const hasVideo = Boolean(doc.querySelector("video, iframe[src*='youtube'], iframe[src*='vimeo']"));
+      const hasChat = /intercom|drift|hubspot|zendesk|crisp|livechat|tawk/i.test(snapshot.body);
+      const hasTrust = TRUST_WORDS.test(wordText);
+      const hasUrgency = URGENCY_WORDS.test(wordText);
+      const hasBenefits = BENEFIT_WORDS.test((h1s[0] || "") + " " + description);
+      const privacy = [...doc.querySelectorAll("a")].some((a) => /privacy/i.test(text(a)));
+      const pageType = detectPageType(parsedUrl, wordText);
+      const lang = attr(doc.documentElement, "lang");
+
+      const scores = {
+        value: 58,
+        cta: 55,
+        trust: 50,
+        friction: 62,
+        content: 55,
+        technical: 60
+      };
+      const recs = [];
+      const strengths = [];
+
+      if (unreachable) {
+        recs.push(rec("high", "Value proposition", "We could not inspect the live HTML",
+          "The page blocked public fetching, so this report is a high-probability checklist for the URL type rather than a source-backed audit.",
+          "Open the page yourself and confirm the H1, primary CTA, form length, and trust evidence above the fold.",
+          parsedUrl.hostname));
+      }
+
+      if (h1s.length === 1 && h1s[0].length > 8) {
+        scores.value += 18;
+        strengths.push(`Clear H1: “${clip(h1s[0], 90)}”`);
+      } else if (h1s.length === 0) {
+        scores.value -= 22;
+        recs.push(rec("high", "Value proposition", "Add one unmistakable H1",
+          "Visitors decide in seconds whether they are in the right place. A missing H1 hides the offer.",
+          "Put a benefit-led headline in a single H1, 6–12 words, that names the outcome and the audience.",
+          h1s.length === 0 && title ? `No H1 was found. Title tag is “${clip(title, 80)}”.` : "No H1 was found in the snapshot."));
+      } else if (h1s.length > 2) {
+        scores.value -= 10;
+        recs.push(rec("medium", "Value proposition", "Collapse competing headlines",
+          "Multiple H1s split attention and dilute the offer.",
+          "Keep one H1 for the core promise. Demote the rest to H2s that support objections or proof.",
+          `${h1s.length} H1s: ${h1s.slice(0, 3).map((h) => clip(h, 40)).join("; ")}`));
+      }
+
+      if (description && description.length >= 110 && description.length <= 170) {
+        scores.value += 8;
+        strengths.push("Meta description is in the effective length range.");
+      } else {
+        scores.value -= 8;
+        recs.push(rec("medium", "Value proposition", "Rewrite the meta description as an ad",
+          "Search and social snippets are often the first conversion moment.",
+          "Write 120–160 characters that state the outcome, a proof point, and a reason to click.",
+          description ? `Current length: ${description.length} characters.` : "No meta description found."));
+      }
+
+      if (hasBenefits) {
+        scores.value += 10;
+        strengths.push("Headline or description uses outcome language.");
+      } else {
+        scores.value -= 8;
+        recs.push(rec("high", "Value proposition", "Lead with the customer outcome, not the product",
+          "Feature-first copy forces the visitor to do the translation work.",
+          "Open with the job to be done, then name the product. Example: “Close enterprise deals faster” before feature lists.",
+          `H1: ${h1s[0] ? clip(h1s[0], 80) : "missing"}`));
+      }
+
+      if (strongCtas.length) {
+        scores.cta += 20;
+        strengths.push(`Action-oriented CTA found: “${clip(strongCtas[0], 48)}”`);
+      } else if (limited) {
+        scores.cta -= 6;
+        recs.push(rec("medium", "Calls to action", "Confirm a single, specific primary CTA above the fold",
+          "This snapshot did not include button markup, so visual CTAs may already exist.",
+          "Use an outcome label such as Start free trial, Book a demo, or Shop now, and make it the most visually dominant control.",
+          "Button HTML was not present in the fetched snapshot."));
+      } else {
+        scores.cta -= 16;
+        recs.push(rec("high", "Calls to action", "Replace vague CTAs with a specific next step",
+          "Generic labels like Learn more do not tell the visitor what they get.",
+          "Use first-person or outcome labels: Get the demo, Start free trial, See pricing, Add to cart.",
+          ctas.length ? `Examples on page: ${ctas.slice(0, 4).join(", ")}` : "No clear CTA controls were detected."));
+      }
+
+      if (ctas.length > 14) {
+        scores.cta -= 12;
+        recs.push(rec("medium", "Calls to action", "Establish one primary action per view",
+          "Too many competing buttons create choice paralysis and lower click-through on the money action.",
+          "Keep one visually dominant primary CTA. Style secondary paths as text links.",
+          `${ctas.length} CTA-like controls detected.`));
+      } else if (ctas.length === 0) {
+        if (!limited) scores.cta -= 20;
+      } else if (ctas.length <= 6) {
+        scores.cta += 8;
+      }
+
+      if (weakCtas.length && !strongCtas.length) {
+        scores.cta -= 8;
+      }
+
+      if (hasHttps) {
+        scores.trust += 8;
+        scores.technical += 8;
+      } else {
+        scores.trust -= 18;
+        scores.technical -= 16;
+        recs.push(rec("high", "Trust", "Serve the page over HTTPS",
+          "Browsers mark HTTP pages as not secure, which kills conversion before the offer is read.",
+          "Redirect all HTTP traffic to HTTPS and load assets from secure origins.",
+          url));
+      }
+
+      if (hasTrust) {
+        scores.trust += 18;
+        strengths.push("Trust or social-proof language is present.");
+      } else {
+        scores.trust -= 14;
+        recs.push(rec("high", "Trust", "Put proof next to the ask",
+          "Unfamiliar brands convert when specific proof reduces risk at the decision point.",
+          "Add named testimonials, logos, review scores, or quantified results within one scroll of the primary CTA.",
+          "No review, testimonial, guarantee, or 'trusted by' language was detected."));
+      }
+
+      if (privacy) {
+        scores.trust += 6;
+      } else if (forms.length) {
+        scores.trust -= 8;
+        recs.push(rec("medium", "Trust", "Link privacy terms beside form submits",
+          "People hesitate to give an email when the risk is unexplained.",
+          "Place a short reassurance and a Privacy Policy link under the submit button.",
+          `${forms.length} form(s) found without an obvious privacy link.`));
+      }
+
+      if (fields.length > 6) {
+        scores.friction -= 18;
+        recs.push(rec("high", "Friction", "Cut the form down to the fields you will use this week",
+          "Each extra field is a drop-off. Long forms signal a high-commitment ask too early.",
+          "Collect email (and maybe name) first. Ask company size, phone, and role after value is delivered.",
+          `${fields.length} visible fields across ${forms.length} form(s).`));
+      } else if (fields.length > 0 && fields.length <= 4) {
+        scores.friction += 12;
+        strengths.push(`Lean form: ${fields.length} visible field${fields.length === 1 ? "" : "s"}.`);
+      }
+
+      if (navLinks.length > 18) {
+        scores.friction -= 10;
+        recs.push(rec("medium", "Friction", "Simplify the header on conversion pages",
+          "Landing pages with full site navigation leak attention back into browsing.",
+          "Use a short header: logo, one supporting link, and the primary CTA. Move the rest to the footer.",
+          `${navLinks.length} header/nav links detected.`));
+      } else if (navLinks.length && navLinks.length <= 8) {
+        scores.friction += 8;
+      }
+
+      if (hasUrgency) {
+        scores.friction += 4;
+        recs.push(rec("low", "Friction", "Keep urgency honest",
+          "Fake countdown timers destroy trust once people reload the page.",
+          "Tie urgency to real inventory, cohort close dates, or seasonal pricing — and keep it consistent.",
+          "Urgency language was detected on the page."));
+      }
+
+      if (words.length < 80 && !unreachable) {
+        scores.content -= 16;
+        recs.push(rec("high", "Content", "The page is too thin to answer objections",
+          "Short pages rarely handle price, risk, fit, or 'why you'.",
+          "Add scannable sections: who it is for, how it works, proof, pricing or plan contrast, and FAQ.",
+          `About ${words.length} words of visible copy.`));
+      } else if (words.length > 2500) {
+        scores.content -= 8;
+        recs.push(rec("medium", "Content", "Make a long page easier to scan",
+          "Walls of copy hide the CTA and exhaust scanners.",
+          "Use short subheads, bullets, a sticky CTA, and a table of contents for pages this long.",
+          `About ${words.length} words of visible copy.`));
+      } else if (words.length) {
+        scores.content += 10;
+      }
+
+      if (hasFaq) {
+        scores.content += 8;
+        strengths.push("FAQ or objection-handling section detected.");
+      } else if (pageType === "saas" || pageType === "lead") {
+        scores.content -= 6;
+        recs.push(rec("medium", "Content", "Add an FAQ that kills the top 5 objections",
+          "Pricing, security, implementation time, and 'does this work for us' questions stall conversion.",
+          "Answer those in plain language near the bottom, with a repeated CTA after the last answer.",
+          `Page looks like a ${pageType} page without an FAQ.`));
+      }
+
+      if (hasPricing && (pageType === "saas" || pageType === "ecommerce")) {
+        scores.content += 6;
+        strengths.push("Pricing signals are visible.");
+      } else if (pageType === "saas") {
+        recs.push(rec("medium", "Content", "Do not hide the price of admission",
+          "If visitors cannot estimate cost, they bounce to a competitor who is clearer.",
+          "Show starting price, a free tier, or 'talk to sales' with expected range. Ambiguity is a tax.",
+          "Little or no pricing language was found."));
+      }
+
+      if (hasVideo) {
+        scores.content += 6;
+        strengths.push("Video or embedded demo is present.");
+      }
+
+      if (hasChat) {
+        scores.friction += 6;
+        strengths.push("Live chat or messenger widget detected.");
+      } else if (pageType === "saas" || pageType === "ecommerce") {
+        recs.push(rec("low", "Friction", "Offer a low-effort help path",
+          "Some visitors convert only after a last-mile question is answered.",
+          "Add chat, a concise contact CTA, or a demo calendar — not all three competing equally.",
+          "No common chat snippet was detected."));
+      }
+
+      if (viewport) {
+        scores.technical += 12;
+        strengths.push("Mobile viewport meta tag is set.");
+      } else if (!limited) {
+        scores.technical -= 18;
+        recs.push(rec("high", "Technical", "Declare a mobile viewport",
+          "Without it, mobile browsers zoom a desktop layout. Tiny CTAs do not get tapped.",
+          'Add <meta name="viewport" content="width=device-width, initial-scale=1"> and test the primary CTA at 375px width.',
+          "No viewport meta tag found."));
+      }
+
+      if (images.length && missingAlt / images.length > 0.4) {
+        scores.technical -= 8;
+        recs.push(rec("low", "Technical", "Write alt text that sells and includes",
+          "Missing alt hurts accessibility and sometimes image search. It also means product shots are unexplained if images fail.",
+          "Describe the outcome in the image, not 'image123'.",
+          `${missingAlt} of ${images.length} images lack alt text.`));
+      }
+
+      if (scripts > 25) {
+        scores.technical -= 10;
+        recs.push(rec("medium", "Technical", "Audit third-party scripts on the landing path",
+          "Tag managers, chat, A/B tools, and pixels stack until the first CTA is slow to appear.",
+          "Keep marketing tags off the critical path, lazy-load chat, and measure LCP on mobile.",
+          `${scripts} script tags in the snapshot.`));
+      } else if (!limited && scripts) {
+        scores.technical += 4;
+      }
+
+      if (ogTitle || canonical) {
+        scores.technical += 6;
+      }
+
+      if (jsonLd) {
+        scores.trust += 4;
+        strengths.push("Structured data (JSON-LD) is present.");
+      }
+
+      if (!lang && !limited) {
+        scores.technical -= 4;
+        recs.push(rec("low", "Technical", "Set the document language",
+          "Screen readers and translation tools need lang to present the page correctly.",
+          'Add lang="en" (or the correct code) on the <html> element.',
+          "No lang attribute on <html>."));
+      }
+
+      if (pageType === "ecommerce") {
+        recs.push(rec("medium", "Trust", "Make shipping, returns, and stock obvious before checkout",
+          "Unexpected costs and return anxiety are classic cart killers.",
+          "Surface free-shipping threshold, return window, and delivery estimate on product and cart views.",
+          "This URL looks like a product or checkout journey."));
+      }
+
+      const order = { high: 0, medium: 1, low: 2 };
+      recs.sort((a, b) => order[a.priority] - order[b.priority] || a.title.localeCompare(b.title));
+
+      const clamped = Object.fromEntries(Object.entries(scores).map(([key, value]) => [key, clamp(value, 8, 98)]));
+      const overall = Math.round(
+        clamped.value * 0.22 +
+        clamped.cta * 0.22 +
+        clamped.trust * 0.18 +
+        clamped.friction * 0.16 +
+        clamped.content * 0.12 +
+        clamped.technical * 0.10
+      );
+
+      return {
+        limited: limited || unreachable,
+        unreachable,
+        title,
+        description,
+        h1: h1s[0] || "",
+        pageType,
+        ctas: ctas.slice(0, 6),
+        forms: forms.length,
+        fields: fields.length,
+        words: words.length,
+        scores: clamped,
+        overall,
+        recs,
+        strengths: strengths.slice(0, 6)
+      };
+    }
+
+    function wrapTextAsHtml(text) {
+      const escape = (value) => value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      const titleMatch = text.match(/^Title:\s*(.+)$/m);
+      const title = titleMatch ? escape(titleMatch[1].trim()) : "";
+      const lines = text.split(/\r?\n/).map((line) => {
+        const heading = line.match(/^(#{1,3})\s+(.+)$/);
+        if (!heading) return escape(line);
+        const tag = "h" + heading[1].length;
+        return `<${tag}>${escape(heading[2])}</${tag}>`;
+      });
+      if (title && !/^#\s+/m.test(text)) {
+        lines.unshift(`<h1>${title}</h1>`);
+      }
+      return `<!doctype html><html><head><title>${title}</title></head><body>${lines.join("\n")}</body></html>`;
+    }
+
+    function strip(doc, selector) {
+      doc.querySelectorAll(selector).forEach((node) => node.remove());
+    }
+
+    function text(el) {
+      return (el && (el.textContent || "").replace(/\s+/g, " ").trim()) || "";
+    }
+
+    function attr(el, name) {
+      return el ? (el.getAttribute(name) || "").trim() : "";
+    }
+
+    function visibleText(doc) {
+      if (!doc.body) return "";
+      return (doc.body.textContent || "").replace(/\s+/g, " ").trim();
+    }
+
+    function collectMarkdownCtas(raw) {
+      const labels = [];
+      const pattern = /\[(?!Image\b)([^\]]{2,48})\]\((https?:[^)]+|\/[^)]+)\)/gi;
+      let match;
+      while ((match = pattern.exec(raw))) {
+        labels.push(match[1].replace(/\s+/g, " ").trim());
+      }
+      return labels;
+    }
+
+    function mergeCtas(primary, extra) {
+      const unique = [...primary];
+      for (const label of extra) {
+        if (!unique.some((item) => item.toLowerCase() === label.toLowerCase())) unique.push(label);
+      }
+      return unique.filter((label) => STRONG_CTA.test(label) || WEAK_CTA.test(label) || /demo|trial|cart|buy|shop|pricing|signup|sign up|subscribe|download|contact|book|get |start /i.test(label));
+    }
+
+    function collectCtas(doc) {
+      const nodes = [...doc.querySelectorAll("a, button, input[type='submit'], input[type='button']")];
+      const labels = nodes.map((el) => {
+        if (el.tagName === "INPUT") return el.getAttribute("value") || "";
+        return text(el);
+      }).map((label) => label.replace(/\s+/g, " ").trim()).filter((label) => label.length > 1 && label.length < 48);
+      const unique = [];
+      for (const label of labels) {
+        if (!unique.some((item) => item.toLowerCase() === label.toLowerCase())) unique.push(label);
+      }
+      return unique.filter((label) => STRONG_CTA.test(label) || WEAK_CTA.test(label) || /demo|trial|cart|buy|shop|pricing|signup|sign up|subscribe|download|contact|book|get /i.test(label));
+    }
+
+    function detectPageType(parsedUrl, wordText) {
+      const path = parsedUrl.pathname.toLowerCase();
+      const hay = `${path} ${wordText.slice(0, 1200)}`.toLowerCase();
+      if (/\/cart\b|\/checkout\b|\/product\/|add to cart|buy now/.test(hay)) return "ecommerce";
+      if (/\/pricing\b|\/demo\b|\/trial\b|start (for )?free|book a demo/.test(hay)) return "saas";
+      if (/\/contact\b|\/quote\b|request (a )?quote|book a call/.test(hay)) return "lead";
+      if (/\/blog\b|\/article\b|\/news\b|\/guide\b/.test(hay)) return "content";
+      if (/payments?|billing|subscription|api|platform/.test(hay)) return "saas";
+      return "marketing";
+    }
+
+    function rec(priority, category, title, why, how, evidence) {
+      return { priority, category, title, why, how, evidence };
+    }
+
+    function clip(value, n) {
+      return value.length > n ? value.slice(0, n - 1) + "…" : value;
+    }
+
+    function clamp(n, min, max) {
+      return Math.max(min, Math.min(max, Math.round(n)));
+    }
+
+    function scoreLabel(score) {
+      if (score >= 80) return "Strong conversion foundation";
+      if (score >= 65) return "Solid, with clear upside";
+      if (score >= 50) return "Leaking conversions";
+      return "High-friction experience";
+    }
+
+    function ringColor(score) {
+      if (score >= 80) return "#1e6b4a";
+      if (score >= 65) return "#b8862a";
+      return "#c94b28";
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function renderReport(url, snapshot, report) {
+      const shot = `https://s.wordpress.com/mshots/v1/${encodeURIComponent(url)}?w=1200`;
+      const color = ringColor(report.overall);
+      const circumference = 2 * Math.PI * 46;
+      const offset = circumference - (report.overall / 100) * circumference;
+      const cats = [
+        ["Value", report.scores.value],
+        ["CTAs", report.scores.cta],
+        ["Trust", report.scores.trust],
+        ["Friction", report.scores.friction],
+        ["Content", report.scores.content],
+        ["Technical", report.scores.technical]
+      ];
+
+      resultsEl.className = "results visible";
+      resultsEl.innerHTML = `
+        <div class="summary">
+          <article class="card">
+            <div class="shot"><img alt="Page screenshot" src="${escapeHtml(shot)}" /></div>
+            <div class="page-meta">
+              <h2>${escapeHtml(report.title || "Untitled page")}</h2>
+              <p><a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(url)}</a></p>
+              <p style="margin-top:8px">${escapeHtml(report.description || report.h1 || "No description extracted.")}</p>
+              <div class="found">
+                <b>${escapeHtml(report.pageType)} page</b>
+                <b>${report.forms} form${report.forms === 1 ? "" : "s"}</b>
+                <b>${report.fields} fields</b>
+                <b>${report.words} words</b>
+                ${report.ctas[0] ? `<b>CTA: ${escapeHtml(clip(report.ctas[0], 28))}</b>` : ""}
+              </div>
+            </div>
+          </article>
+          <article class="card score-card">
+            <div class="score-top">
+              <svg class="ring" viewBox="0 0 108 108" aria-hidden="true">
+                <circle cx="54" cy="54" r="46" fill="none" stroke="#ece4d6" stroke-width="10" />
+                <circle cx="54" cy="54" r="46" fill="none" stroke="${color}" stroke-width="10"
+                  stroke-linecap="round" transform="rotate(-90 54 54)"
+                  stroke-dasharray="${circumference}" stroke-dashoffset="${offset}" />
+              </svg>
+              <div>
+                <div class="score-num">${report.overall}</div>
+                <div class="score-label">${scoreLabel(report.overall)}</div>
+              </div>
+            </div>
+            ${report.limited ? `<div class="limited">${report.unreachable ? "Live HTML was blocked. Recommendations are based on URL patterns and CRO defaults." : "Fetched as text rather than full HTML, so structure checks are limited."}</div>` : ""}
+            <div class="cats">
+              ${cats.map(([name, value]) => `
+                <div class="cat">
+                  <span>${name}</span>
+                  <div class="bar"><i style="width:${value}%"></i></div>
+                  <strong>${value}</strong>
+                </div>`).join("")}
+            </div>
+          </article>
+        </div>
+        <div class="toolbar">
+          <h3>${report.recs.length} recommendations</h3>
+          <button class="ghost" type="button" id="copy">Copy report</button>
+        </div>
+        <div class="rec-list">
+          ${report.recs.map((item) => `
+            <article class="rec">
+              <div class="rec-head">
+                <span class="pri ${item.priority}">${item.priority} impact</span>
+                <span class="tag">${escapeHtml(item.category)}</span>
+              </div>
+              <h4>${escapeHtml(item.title)}</h4>
+              <p>${escapeHtml(item.why)}</p>
+              <div class="how"><strong>Do this:</strong> ${escapeHtml(item.how)}</div>
+              ${item.evidence ? `<div class="evidence">Evidence: ${escapeHtml(item.evidence)}</div>` : ""}
+            </article>`).join("")}
+        </div>
+        ${report.strengths.length ? `
+          <div class="strengths">
+            <div class="toolbar"><h3>What is already working</h3></div>
+            <ul>${report.strengths.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+          </div>` : ""}
+      `;
+
+      const copyBtn = document.getElementById("copy");
+      copyBtn.addEventListener("click", async () => {
+        const lines = [
+          `Conversion report for ${url}`,
+          `Score: ${report.overall}/100 (${scoreLabel(report.overall)})`,
+          "",
+          ...report.recs.map((item, index) => `${index + 1}. [${item.priority}] ${item.title}\n${item.why}\nDo this: ${item.how}`),
+          "",
+          "Working well:",
+          ...report.strengths.map((item) => `- ${item}`)
+        ];
+        try {
+          await navigator.clipboard.writeText(lines.join("\n"));
+          copyBtn.textContent = "Copied";
+          setTimeout(() => { copyBtn.textContent = "Copy report"; }, 1600);
+        } catch {
+          copyBtn.textContent = "Copy failed";
+        }
+      });
+
+      resultsEl.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  </script>
+</body>
+</html>
